@@ -12,6 +12,7 @@ public class PawnShoot : MonoBehaviour
     private float cooldown = 2f;
 
     public float missRadius = 2f;
+    public int shotByLayer = 0;
 
 
     public bool enemyinRange = false;
@@ -43,5 +44,6 @@ public class PawnShoot : MonoBehaviour
         Quaternion offsetRot = new Quaternion(0, -90, 0, 0);
         GameObject tempBullet = Instantiate(bullet, muzzleTransform.position, offsetRot);
         tempBullet.GetComponent<SimpleBullet>().hitpoint = enemy.position + missOffset;
+        tempBullet.layer = shotByLayer;
     }
 }

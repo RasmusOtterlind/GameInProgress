@@ -33,6 +33,6 @@ public class SimpleBullet : MonoBehaviour
             collision.gameObject.GetComponent<HealthEntity>().TakeDamage(damage);
         }
         
-        Destroy(gameObject);
+        //Destroy(gameObject);
     }
 }

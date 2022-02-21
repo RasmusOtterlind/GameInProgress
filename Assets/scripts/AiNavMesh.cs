@@ -24,7 +24,7 @@ public class AiNavMesh : MonoBehaviour
     public bool lookForCover = true;
 
     public float desiredDistance = 15f;
-    public float currentDistance = 15f;
+    private float currentDistance = 15f;
 
 
     private void Awake()
@@ -55,12 +55,11 @@ public class AiNavMesh : MonoBehaviour
             transform.LookAt(overlappingEnemies[index].transform.position);
             currentDistance = (overlappingEnemies[index].transform.position - transform.position).magnitude;
         }
-        foreach (var enemyCollider in overlappingEnemies)
-        {
+      
 
-            enemyInRange = true;
+         
 
-        }
+        
         //Ifall fiender är nära så letar vi efter skydd
 
         if (overlappingEnemies.Length == 0)
@@ -113,7 +112,19 @@ public class AiNavMesh : MonoBehaviour
             }
             else
             {
-                navMeshAgent.destination = enemyBaseTransform.position;
+
+                Collider[] overlappingCover = Physics.OverlapSphere(transform.position, coverRange, friendlyCover);
+                if(overlappingCover.Length > 0)
+                {
+                    int indexCover = ClosestCollider(overlappingCover);
+
+                    navMeshAgent.destination = overlappingCover[indexCover].transform.position;
+                }
+               
+              
+                    //navMeshAgent.destination = enemyBaseTransform.position;
+              
+                
             }
 
 

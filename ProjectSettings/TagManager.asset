@@ -9,15 +9,15 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Unused
   - Water
   - UI
   - BlueCover1
   - RedCover2
   - BlueTeam
   - RedTeam
-  - 
-  - 
+  - RedTeamShot
+  - Cover
   - 
   - 
   - 

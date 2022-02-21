@@ -267,7 +267,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a4fb8cab800a8c45910605752080316, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveTransform: {fileID: 0}
   enemyBaseTransform: {fileID: 0}
   firingRange: 40
   enemyLayers:
@@ -280,6 +279,8 @@ MonoBehaviour:
   coverRange: 15
   inCover: 0
   lookForCover: 1
+  desiredDistance: 15
+  currentDistance: 15
 --- !u!54 &-8441645866759892534
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -311,7 +312,7 @@ MonoBehaviour:
   enemy: {fileID: 0}
   muzzleTransform: {fileID: 3500289609084590726}
   bullet: {fileID: 4679439379161112275, guid: 60c4dbd100d85aa48ac89fc317b2d09a, type: 3}
-  firespeed: 3
+  firespeed: 1
   missRadius: 1
   enemyinRange: 0
 --- !u!114 &695591728906183927
