@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - Cover
+  - Bullet
+  - BlueBase
+  - RedBase
   layers:
   - Default
   - TransparentFX
@@ -16,9 +19,9 @@ TagManager:
   - RedCover2
   - BlueTeam
   - RedTeam
-  - RedTeamShot
+  - RedTeamBullet
+  - BlueTeamBullet
   - Cover
-  - 
   - 
   - 
   - 

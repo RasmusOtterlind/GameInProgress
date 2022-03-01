@@ -1,65 +1,134 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using TMPro;
+using Photon.Pun;
 public class GameManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    public GameObject basicSoldier;
+    // Basic Soldiers
+    [SerializeField] private GameObject basicBlueSoldier; 
+    [SerializeField] private GameObject basicRedSoldier;
+    [SerializeField] private GameObject sniperBlue;
+    [SerializeField] private GameObject sniperRed;
+
+
+
     public Transform blueBase;
     public Transform redBase;
 
-    public Material blueMaterial;
-    public Material redMaterial;
+    [SerializeField] private Material blueMaterial;
+    [SerializeField] private Material redMaterial;
 
     public LayerMask blueTeam;
     public LayerMask blueTeamCover;
     public LayerMask redTeam;
     public LayerMask redTeamCover;
 
-    public float blueMoney = 0f;
-    public float redMoney = 0f;
+    public float blueMoney = 30f;
+    public float redMoney = 30f;
+
+    [SerializeField] private float basicSoldierCost = 15f;
+    [SerializeField] private float sniperCost = 40f;
+
+    [SerializeField] private GameObject redMoneyTag;
+    [SerializeField] private GameObject blueMoneyTag;
+
+    
+    private PhotonView photonView;
+
+    private bool incomeGain = false;
 
     void Start()
     {
-        
+        photonView = GetComponent<PhotonView>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (incomeGain)
+        {
+            Income();
+        }
         
     }
 
     public void SpawnSoldierBlue()
     {
-        Quaternion offsetRot = new Quaternion(0, -90, 0, 0);
-        Vector3 randomSpawnOffset = new Vector3(Random.Range(0, 5), -3, Random.Range(-19, 19));
-        GameObject tempobjekt = Instantiate(basicSoldier, blueBase.position + randomSpawnOffset, offsetRot);
-        fixBlueObject(tempobjekt);
+        if (blueMoney > basicSoldierCost)
+        {
+            Quaternion offsetRot = new Quaternion(0, -90, 0, 0);
+            Vector3 randomSpawnOffset = new Vector3(Random.Range(0, 5), -3, Random.Range(-19, 19));
+            GameObject tempobjekt = PhotonNetwork.Instantiate(basicBlueSoldier.name, blueBase.position + randomSpawnOffset, offsetRot);
+            photonView.RPC("ChangeBlueMoney", RpcTarget.All, -basicSoldierCost);
+        }
+       
     }
-    private void fixBlueObject(GameObject bluePawn)
+    public void SpawnSniperBlue()
     {
-        bluePawn.layer = 8;
-        bluePawn.GetComponent<AiNavMesh>().enemyBaseTransform = redBase;
-        bluePawn.GetComponent<AiNavMesh>().enemyLayers = redTeam;
-        bluePawn.GetComponent<AiNavMesh>().friendlyCover = blueTeamCover;
-        bluePawn.GetComponent<MeshRenderer>().material = blueMaterial;
+        if (blueMoney > sniperCost)
+        {
+            Quaternion offsetRot = new Quaternion(0, -90, 0, 0);
+            Vector3 randomSpawnOffset = new Vector3(Random.Range(0, 5), -3, Random.Range(-19, 19));
+            GameObject tempobjekt = PhotonNetwork.Instantiate(sniperBlue.name, blueBase.position + randomSpawnOffset, offsetRot);
+            photonView.RPC("ChangeBlueMoney", RpcTarget.All, -sniperCost);
+        }
+
     }
 
     public void SpawnSoldierRed()
     {
-        Quaternion offsetRot = new Quaternion(0, -90, 0, 0);
-        Vector3 randomSpawnOffset = new Vector3(Random.Range(0, 5), -3, Random.Range(-19, 19));
-        GameObject tempobjekt = Instantiate(basicSoldier, redBase.position + randomSpawnOffset, offsetRot);
-        fixRedObject(tempobjekt);
+        if (redMoney > basicSoldierCost)
+        {
+            Quaternion offsetRot = new Quaternion(0, -90, 0, 0);
+            Vector3 randomSpawnOffset = new Vector3(Random.Range(0, 5), -3, Random.Range(-19, 19));
+            GameObject tempobjekt = PhotonNetwork.Instantiate(basicRedSoldier.name, redBase.position + randomSpawnOffset, offsetRot);
+            photonView.RPC("ChangeRedMoney", RpcTarget.All, -basicSoldierCost);
+        }
+
     }
-    private void fixRedObject(GameObject pawn)
+
+    public void SpawnSniperRed()
     {
-        pawn.layer = 9;
-        pawn.GetComponent<AiNavMesh>().enemyBaseTransform = blueBase;
-        pawn.GetComponent<AiNavMesh>().enemyLayers = blueTeam;
-        pawn.GetComponent<AiNavMesh>().friendlyCover = redTeamCover;
-        pawn.GetComponent<MeshRenderer>().material = redMaterial;
+        if(redMoney > sniperCost)
+        {
+            Quaternion offsetRot = new Quaternion(0, -90, 0, 0);
+            Vector3 randomSpawnOffset = new Vector3(Random.Range(0, 5), -3, Random.Range(-19, 19));
+            GameObject tempobjekt = PhotonNetwork.Instantiate(sniperRed.name, redBase.position + randomSpawnOffset, offsetRot);
+            photonView.RPC("ChangeRedMoney", RpcTarget.All, -sniperCost);
+        }
+        
+    }
+
+    private void Income()
+    {
+        redMoney += Time.deltaTime;
+        blueMoney += Time.deltaTime;
+
+        redMoneyTag.GetComponent<TextMeshProUGUI>().SetText("Red Money: " + Mathf.RoundToInt(redMoney));
+        blueMoneyTag.GetComponent<TextMeshProUGUI>().SetText("Blue Money: " + Mathf.RoundToInt(blueMoney));
+    }
+
+    [PunRPC]
+    private void ChangeBlueMoney(float change)
+    {
+        blueMoney += change;
+    }
+
+    [PunRPC]
+    private void ChangeRedMoney(float change)
+    {
+        redMoney += change;
+    }
+
+    public void ToggleIncomeGain()
+    {
+        photonView.RPC("ToogleIncome", RpcTarget.AllBuffered);
+    }
+    
+    [PunRPC] 
+    private void ToogleIncome()
+    {
+        incomeGain = !incomeGain;
     }
 }

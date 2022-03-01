@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
 public class HealthEntity : MonoBehaviour
 {
@@ -16,25 +17,38 @@ public class HealthEntity : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(hitpoints <= 0)
+        if (GetComponent<PhotonView>().IsMine)
         {
-            destroy = true;
+            if (hitpoints <= 0)
+            {
+                destroy = true;
+            }
         }
+
+        if (destroy && GetComponent<PhotonView>().IsMine)
+        {
+
+            PhotonNetwork.Destroy(gameObject);
+        }
+
     }
 
     private void LateUpdate()
     {
-        if (destroy)
-        {
-           
-            Destroy(gameObject);
-        }
+       
     }
-    
-
+   
     public void TakeDamage(float damage)
     {
-        hitpoints -= damage;
 
+        GetComponent<PhotonView>().RPC("LowerHealth", RpcTarget.All, damage);
+        
+
+    }
+
+    [PunRPC]
+    private void LowerHealth(float damage)
+    {
+        hitpoints -= damage;
     }
 }

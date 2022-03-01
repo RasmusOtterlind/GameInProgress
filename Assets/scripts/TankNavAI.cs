@@ -33,6 +33,7 @@ public class TankNavAI : MonoBehaviour
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
         turret = transform.GetChild(1).gameObject;
+        navMeshAgent.updateUpAxis = false;
     }
     // Start is called before the first frame update
     void Start()
@@ -64,7 +65,7 @@ public class TankNavAI : MonoBehaviour
 
         //Ifall fiender är nära så letar vi efter skydd
 
-        if (overlappingEnemies.Length == 0)
+        if (overlappingEnemies.Length == 0 && enemyBaseTransform)
         {
             enemyInRange = false;
             navMeshAgent.destination = enemyBaseTransform.position;

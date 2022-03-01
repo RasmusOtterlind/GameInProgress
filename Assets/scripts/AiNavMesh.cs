@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using Photon.Pun;
 
 public class AiNavMesh : MonoBehaviour
 {
@@ -26,7 +27,12 @@ public class AiNavMesh : MonoBehaviour
     public float desiredDistance = 15f;
     private float currentDistance = 15f;
 
+    private Transform enemyTransform;
+    public string enemyBaseTagString;
 
+    [SerializeField] LayerMask visiblityMask;
+    private bool isVisible = false;
+    
     private void Awake()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();    
@@ -34,13 +40,19 @@ public class AiNavMesh : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        enemyBaseTransform = GameObject.FindGameObjectsWithTag(enemyBaseTagString)[0].transform;
         
+       
     }
 
     // Update is called once per frame
     void Update()
     {
-        HandleOverlapLogic();
+        if(GetComponent<PhotonView>().IsMine)
+        {
+            HandleOverlapLogic();
+        }
+       
     }
 
     private void HandleOverlapLogic()
@@ -49,18 +61,28 @@ public class AiNavMesh : MonoBehaviour
 
         if (overlappingEnemies.Length > 0)
         {
-            int index = ClosestCollider(overlappingEnemies);
+            int index = ClosestVisibleCollider(overlappingEnemies);
             enemyInRange = true;
-            GetComponent<PawnShoot>().enemy = overlappingEnemies[index].transform;
-            transform.LookAt(overlappingEnemies[index].transform.position);
-            currentDistance = (overlappingEnemies[index].transform.position - transform.position).magnitude;
+            if (isVisible)
+            {
+                if (GetComponent<PawnShoot>())
+                {
+                    GetComponent<PawnShoot>().enemy = overlappingEnemies[index].transform;
+                }
+                else if (GetComponent<PawnShootBurst>())
+                {
+                    GetComponent<PawnShootBurst>().enemy = overlappingEnemies[index].transform;
+                }
+                transform.LookAt(overlappingEnemies[index].transform.position);
+                enemyTransform = overlappingEnemies[index].transform;
+                currentDistance = (overlappingEnemies[index].transform.position - transform.position).magnitude;
+            }
+            else
+            {
+                enemyInRange = false;
+            }
+            
         }
-      
-
-         
-
-        
-        //Ifall fiender är nära så letar vi efter skydd
 
         if (overlappingEnemies.Length == 0)
         {
@@ -107,6 +129,10 @@ public class AiNavMesh : MonoBehaviour
                     }
                     
                 }
+                if((ChosenPosition - enemyTransform.position).magnitude < firingRange && ChosenPosition != transform.position)
+                {
+                    ChosenPosition = enemyBaseTransform.position;
+                }
                 navMeshAgent.destination = ChosenPosition;
                 colliders.Clear();
             }
@@ -119,17 +145,23 @@ public class AiNavMesh : MonoBehaviour
                     int indexCover = ClosestCollider(overlappingCover);
 
                     navMeshAgent.destination = overlappingCover[indexCover].transform.position;
-                }
-               
-              
-                    //navMeshAgent.destination = enemyBaseTransform.position;
-              
+                }      
                 
             }
-
-
         }
-        GetComponent<PawnShoot>().enemyinRange = enemyInRange;
+        else
+        {
+            navMeshAgent.destination = enemyBaseTransform.position;
+        }
+        if (GetComponent<PawnShoot>())
+        {
+            GetComponent<PawnShoot>().enemyinRange = enemyInRange;
+        }
+        else if (GetComponent<PawnShootBurst>())
+        {
+            GetComponent<PawnShootBurst>().enemyinRange = enemyInRange;
+        }
+      
     }
 
     private int ClosestCollider(Collider[] collidersToCalculate)
@@ -149,5 +181,39 @@ public class AiNavMesh : MonoBehaviour
 
 
         return index;
+    }
+    private int ClosestVisibleCollider(Collider[] collidersToCalculate)
+    {
+        int index = 0;
+        float distance = 2000f;
+        for (int i = 0; i < collidersToCalculate.Length; i++)
+        {
+            float tempDistance = (collidersToCalculate[i].transform.position - transform.position).magnitude;
+            if (distance > tempDistance  && CanSeeTarget(collidersToCalculate[i].transform))
+            {
+                distance = tempDistance;
+                index = i;
+            }
+        }
+        return index;
+    }
+    private bool CanSeeTarget(Transform target)
+    {
+        Vector3 toTarget = target.position - transform.position;
+
+       
+        if (Physics.Raycast(transform.position, toTarget, out RaycastHit hit, firingRange,visiblityMask))
+        {
+            Debug.DrawLine(transform.position, hit.point, Color.red);
+            if (hit.transform == target)
+                {
+                Debug.Log("XXXXXXXXXXXXXXXXHÄRXXXXXXXXXXXXX");
+                    isVisible = true;
+                    return true;
+                }
+        }
+        
+        isVisible = false;
+        return false;
     }
 }

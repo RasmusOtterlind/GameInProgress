@@ -7,6 +7,7 @@ public class CameraControll : MonoBehaviour
 
 
     private float leftRight = 0f;
+    private float backForward = 0f;
     // Start is called before the first frame update
     void Start()
     {
@@ -17,7 +18,19 @@ public class CameraControll : MonoBehaviour
     void Update()
     {
         leftRight = Input.GetAxisRaw("Horizontal");
-        //transform.Translate(transform.right);
+        backForward = Input.GetAxisRaw("Vertical");
+        if (Input.GetButton("Jump"))
+        {
+            transform.Translate(transform.right * Time.deltaTime * leftRight * 60);
+            transform.Translate(transform.forward * Time.deltaTime * backForward * 60);
+        }
+        else
+        {
+            transform.Translate(transform.right * Time.deltaTime * leftRight * 30);
+            transform.Translate(transform.forward * Time.deltaTime * backForward * 30);
+        }
+        
+
         
     }
 }
